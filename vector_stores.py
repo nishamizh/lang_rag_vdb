@@ -44,12 +44,14 @@ SAMPLE_DOCS = [
 ]
 
 # https://reference.langchain.com/python/langchain-chroma/vectorstores/Chroma/from_documents
+# Create a Chroma vectorstore from a list of documents.
 """If you don’t specify a collection name, LangChain automatically creates a Chroma collection named "langchain",
  and stores your documents there — nothing is fetched from anywhere else."""
 
 
 def chroma_basics():
     with tempfile.TemporaryDirectory() as tmpdir:
+        #create a new vector store from documents
         vectorstore = Chroma.from_documents(
             documents=SAMPLE_DOCS, embedding=embedding_model, persist_directory=tmpdir
         )
@@ -70,7 +72,51 @@ def chroma_basics():
         #print(doc.metadata)
         # print(results_basic[1].metadata)
 
+def similarity_search_with_scores():
+    with tempfile.TemporaryDirectory() as tempdir:
+        #create a new vector store from documents
+        vectorstore = Chroma.from_documents(
+            documents=SAMPLE_DOCS, embedding=embedding_model, persist_directory=tempdir
+            )
+        
+        query = "Explain vector stores"
+
+        results_with_scores = vectorstore.similarity_search_with_score(query=query, k=3)
+
+        print(f"Top 3 results with scores for query '{query}':")
+
+        for i, (doc,score) in enumerate(results_with_scores):
+            final_score = 1/(1+score)  #convert distance to similarity
+            print(f" {i+1}: {doc.page_content} (Score: {final_score:.4f}, Source: {doc.metadata['source']})")
+
+
+def metadata_filtering():
+    with tempfile.TemporaryDirectory() as tempdir:
+        vectorstore = Chroma.from_documents(
+            documents=SAMPLE_DOCS, embedding=embedding_model, persist_directory=tempdir
+        )
+
+        query = "What databases are available"
+
+        results = vectorstore.similarity_search(query=query, k=5)
+
+        for i,doc in enumerate(results):
+            print(f" {i+1} -  {doc.page_content} , (Source : {doc.metadata["source"]})")
+
+        # Adding Metadata Filtering
+        filter_criteria = {"topic": "database"}
+        filtered_results = vectorstore.similarity_search(query=query, k=5, filter=filter_criteria)
+
+        for i,doc in enumerate(filtered_results):
+            print(f" {i+1} : {doc.page_content} , (Source: {doc.metadata["source"]})")
+
+
+    
+
+
 
 
 if __name__ == "__main__":
-    chroma_basics()
+    #chroma_basics()
+    #similarity_search_with_scores()
+    metadata_filtering()
