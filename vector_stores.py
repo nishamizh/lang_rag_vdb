@@ -120,3 +120,56 @@ if __name__ == "__main__":
     #chroma_basics()
     #similarity_search_with_scores()
     metadata_filtering()
+
+
+
+#
+# Vector Similarity Search — Step‑by‑Step
+#   1. Load or create your documents
+#       Each document has:
+#           page_content
+#           metadata (optional but useful)
+#   2. Embed the documents
+#       Use an embedding model to convert text → vectors.
+#   3. Store embeddings in a vector database
+#       Examples:Chroma, Pinecone, FAISS
+# 4. Run a similarity search
+#      similarity_search_with_score(query, k)
+#           This returns:
+#               top‑k documents
+#               distance scores (not similarity scores)
+#   5. Interpret the scores
+#       Distance score meaning:
+#            Lower = more similar
+#            Higher = less similar
+# Example:
+# 0.66 → very relevant
+# 1.34 → least relevant
+#   6. Convert distance → similarity (optional)
+#       If you want similarity instead of distance:
+#       similarity=1/(1+distance)
+
+#  Metadata Filtering — Step‑by‑Step
+#   7. Add metadata to each document
+#   Example:
+#   {"topic": "database"}
+
+#   8. Define a filter
+#   Example:
+#       filter_criteria = {"topic": "database"}
+
+#   9. Run similarity search WITH filter
+#       similarity_search(query, k, filter=filter_criteria)
+
+#   10. Vector store first filters documents
+#       It keeps only documents whose metadata matches the filter.
+
+#   11. Then it performs similarity search on the filtered subset
+#       This gives:
+#           fewer documents
+#           more relevant results
+#           metadata‑aware retrieval
+
+#   12. Compare results with and without filter
+#    Without filter → all relevant docs
+#   With filter → only docs matching metadata

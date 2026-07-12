@@ -15,7 +15,7 @@ load_dotenv()
 documents = [
 
     Document(
-        page_content='Product SKU-7742x is our flagship router. It supports'
+        page_content='Product SKU-7742X is our flagship router. It supports'
         'gigabit speeds and advanced QoS features',
         metadata = {'type' : 'product'}
     ),
