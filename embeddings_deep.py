@@ -37,8 +37,39 @@ def batch_embeddings():
     # Processes a single string, Optimized for fast inference, Often uses query‑optimized pooling, Used every time the user asks a question
 
 
+def similarity_search():
+    docs = [
+        "Python is a programming language",
+        "Javascript is used for web development",
+        "Machine learning enables AI applications",
+        "Deep learning uses neural networks",
+        "Cats are popular pets",
+    ]
+
+    query = "What programming languages exist?"
+
+    doc_vector = embedding_model.embed_documents(docs)
+    query_vector = embedding_model.embed_query(query)
+
+    def cosine_similarity(vec1,vec2):
+        return np.dot(vec1,vec2)/(np.linalg.norm(vec1) * np.linalg.norm(vec2))
+    
+    similarities = [cosine_similarity(query_vector, doc_vector) for doc_vector in doc_vector]
+
+    # rank doocuments by similarity
+    ranked_docs = sorted(zip(docs,similarities), key=lambda x:x[1], reverse = True)
+
+    print(f"Query: {query}\n")
+    print("Ranked by similarity: ")
+    for doc,score in ranked_docs:
+        print(f" {score:.4f}: {doc}")
+
+
+
 if __name__ == "__main__":
     # print("=== Single Text Embedding ===")
     # basic_embeddings()
-    print("=== Batch Embedding ===")
-    batch_embeddings()
+    # print("=== Batch Embedding ===")
+    # batch_embeddings()
+    print("=== Similarity Search ===")
+    similarity_search()
