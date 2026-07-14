@@ -16,6 +16,7 @@ dependencies = [
     "langchain-openai>=1.2.2",
     "langchain-text-splitters>=1.1.2",
     "langgraph>=1.2.2",
+    "langsmith>=0.8.8",
     "pypdf>=6.12.2",
     "python-dotenv>=1.2.2",
     "rank-bm25>=0.2.2",
