@@ -12,6 +12,7 @@ from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_classic.storage import InMemoryStore
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -187,8 +188,13 @@ def demo_multi_query_retriever():
     print("=" * 60)
 
     vectorstore = create_base_vectorstore()
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+    llm = ChatGroq(model="llama-3.3-70b-versatile",temperature=0.3)
 
+    """
+    It takes the user’s query and uses an LLM to create several rephrased queries. Each rephrased query is sent to the retriever to fetch different relevant chunks.
+    All retrieved chunks are merged, giving wider coverage. Helps catch information that a single query might miss.
+    Great for ambiguous questions, broad topics, or when users phrase things poorly.
+    """
     # Create multi-query retriever
     retriever = MultiQueryRetriever.from_llm(
         retriever=vectorstore.as_retriever(search_kwargs={"k": 2}), llm=llm
@@ -219,10 +225,15 @@ def demo_contextual_compression():
     print("=" * 60)
 
     vectorstore = create_base_vectorstore()
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatGroq(model="llama-3.3-70b-versatile",temperature=0)
 
+    """
+    # LLMChainExtractor what it does ?LLM receives a chunk and the user query.
+    LLMChainExtractor asks an LLM to pull out only the relevant sentences. Irrelevant text is removed (compression).
+    Output is a short, focused snippet instead of the full chunk. Used to reduce tokens and noise before final RAG answer generation.
+    """
     # Create compressor
-    compressor = LLMChainExtractor.from_llm(llm)
+    compressor = LLMChainExtractor.from_llm(llm) 
 
     # Wrap retriever with compression
     compression_retriever = ContextualCompressionRetriever(
@@ -394,7 +405,7 @@ def demo_advanced_rag_chain():
     print("=" * 60)
 
     vectorstore = create_base_vectorstore()
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatGroq(model="llama-3.3-70b-versatile",temperature=0)
 
     # Multi-query for better recall
     multi_retriever = MultiQueryRetriever.from_llm(
@@ -444,8 +455,8 @@ Answer:"""
 
 
 if __name__ == "__main__":
-    # demo_multi_query_retriever()
+    demo_multi_query_retriever()
     # demo_contextual_compression()
     # demo_ensemble_hybrid_search()
-    demo_parent_document_retriever()
+    # demo_parent_document_retriever()
     # demo_advanced_rag_chain()
