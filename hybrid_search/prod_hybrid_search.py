@@ -2,6 +2,8 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 
+# pip install langchain langchain-openai langchain-chroma rank_bm25 
+# uv add rank_bm25x   
 from langchain_community.vectorstores import Chroma
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
