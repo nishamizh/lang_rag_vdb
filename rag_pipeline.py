@@ -16,7 +16,10 @@ from dotenv import load_dotenv
 import tempfile
 
 load_dotenv()
-embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2") 
+
+#embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2", dimensions=512) 
+# dimensions=512 can be used as 1 of the paramaeter along with model_name to reduce embedding size and cost otherwise default dimesnion is 1536
 
 # Sample knowledge base
 KNOWLEDGE_BASE = """# LangChain Framework
@@ -372,3 +375,13 @@ if __name__ == "__main__":
     # demo_rag_with_fallback()
     # demo_structured_rag()
     # exercise_document_qa()
+
+# response = client.embeddings.create(model="gpt-4o-mini", ,inputs= 'your text', dimensions=512 # reduced from 1536)
+"""
+# Bad : 10,000 API calls
+for query in queries:
+    results = index.query(query)
+
+# Good: Batched queries (if supported)
+results = index.query(queries, batch=True)
+"""

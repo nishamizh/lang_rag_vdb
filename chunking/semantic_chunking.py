@@ -169,3 +169,52 @@ for query in test_queries:
     print("*" * 60)
     recursive_result = test_retrieval(query, recursive_vectorstore, "RECURSIVE")
     semantic_result = test_retrieval(query, semantic_vectorstore, "SEMANTIC")
+
+
+# Method 5 - using BATCH queries to Vector Store
+"""
+Steps to do
+1. Batch embed the queries - 
+query_embeddings = embedding_model.embed_documents(test_queries)
+2. Batch query the vectorstore - 
+results = vectorstore._collection.query(query_embeddings=query_embeddings,n_results=1)
+3. Loop through results
+for i, docs in enumerate(results["documents"]):
+    print(f"Query: {test_queries[i]}")
+    print(f"Retrieved: {docs[0][:150]}...")
+"""
+
+print(f"{'@'*60}")
+print(f"--- BATCH EMBED QUERY ---")
+print(f"{'@'*60}")
+def test_batched_retrieval(test_queries, vectorstore, embedding_model, name):
+    # 1. Batch embed queries
+    query_embeddings = embedding_model.embed_documents(test_queries)
+    """
+    # 2. Batch query recursive index
+    recursive_results = recursive_vectorstore._collection.query(
+        query_embeddings=query_embeddings,
+        n_results=1
+    )
+
+    # 3. Batch query semantic index
+    semantic_results = semantic_vectorstore._collection.query(
+        query_embeddings=query_embeddings,
+        n_results=1
+    )
+    """
+    results = vectorstore._collection.query(query_embeddings=query_embeddings,n_results=1)
+
+    print(f"--- BATCH EMBED QUERY  for - {name} ---")
+    # 4. Print results
+    for i, query in enumerate(test_queries):
+        print("\n" + "*" * 60)
+        print(f"Query: {query}")
+
+        result_doc = results["documents"][i][0]
+
+        print(f"\n {name} Retrieved: {result_doc[:150]}...")
+
+
+recursive_batch_result = test_batched_retrieval(test_queries, recursive_vectorstore,embedding_model, "RECURSIVE")
+semantic_batch_result = test_batched_retrieval(test_queries, semantic_vectorstore, embedding_model,"SEMANTIC")

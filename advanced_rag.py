@@ -207,7 +207,7 @@ def demo_multi_query_retriever():
     print("(Check INFO logs above for generated queries)\n")
 
     # Retrieve documents
-    docs = retriever.invoke(query)
+    docs = retriever.invoke(query) #here we cannot pass list of queries[q1,q2] it will error
 
     print(f"Retrieved {len(docs)} unique documents:")
     for i, doc in enumerate(docs):
