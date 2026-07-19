@@ -122,6 +122,3 @@ for doc in results:
 
 # Different RAG problems and their solutions
 # https://chatgpt.com/s/t_6a541d4072d881918ebf73cb52173c82
-
-
-

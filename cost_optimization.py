@@ -9,6 +9,7 @@ from typing import Optional, Callable
 from functools import lru_cache
 # from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langsmith import traceable
 from dotenv import load_dotenv
@@ -97,16 +98,29 @@ def demo_model_routing():
 
 
 # === Semantic Caching ===
+#  Semantic caching means reusing previous LLM or embedding results when a new query is “semantically similar enough” 
+# to something you’ve already computed, even if the text is not identical. 
 
+# For Production
+#def cosine_similarity(a, b):
+#    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 class SemanticCache:
     """Cache responses with semantic similarity matching."""
 
+    # For prod use similarity_threshold = 0.95
     def __init__(self, similarity_threshold: float = 0.9):
         self.cache = {}
         self.threshold = similarity_threshold
-        self.embedder = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+        """
+        semantic similarity only works when all vectors live in the same embedding space.
+If you use ChatGroq for query embeddings but HuggingFace/OpenAI for document embeddings, the vectors become incompatible, 
+so cosine similarity becomes meaningless and your semantic cache will never match anything.
+        """
+        #self.embedder = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+        self.embedder = HuggingFaceEmbeddings(model="all-MiniLM-L6-v2", temperature=0)
 
+    # _hash_query is not used in production instead use query embedding
     def _hash_query(self, query: str) -> str:
         """Create hash of normalized query."""
         normalized = query.lower().strip()
@@ -124,13 +138,40 @@ class SemanticCache:
         # For demo, just use exact match
 
         return None
+    
+    """
+    # Prod -  Search the cache by vector similarity
+    def get(self, query: str) -> Optional[str]:
+    query_vec = self.embedder.embed_documents([query])[0]
+
+    best_match = None
+    best_score = 0
+
+    for entry in self.cache.values():
+        score = cosine_similarity(query_vec, entry["embedding"])
+        if score > self.threshold and score > best_score:
+            best_match = entry["response"]
+            best_score = score
+
+    return best_match
+    """
 
     def set(self, query: str, response: str):
         """Cache a response."""
         query_hash = self._hash_query(query)
         self.cache[query_hash] = {"query": query, "response": response}
+        """
+        For Production
+        embedding = self.embedder.embed_documents([query])[0]
+        self.cache[query] = {
+        "query": query,
+        "response": response,
+        "embedding": embedding,
+    }
+        """
 
     def stats(self) -> dict:
+        # dictionary with CACHED Key and Length of Cache
         return {"cached_queries": len(self.cache)}
 
 
@@ -292,7 +333,7 @@ if __name__ == "__main__":
     # demo_caching()
     demo_token_budgeting()
 
-    # Production version would:
+    # Production version would for Semantic Cache:
 # 1. Embed the query into a vector
 # 2. Search the cache by vector similarity
 # 3. Return if similarity > threshold (e.g., 0.95)

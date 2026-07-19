@@ -64,12 +64,52 @@ def similarity_search():
     for doc,score in ranked_docs:
         print(f" {score:.4f}: {doc}")
 
+# Caching ---
+def embedding_caching():
+    from langchain_classic.embeddings.cache import CacheBackedEmbeddings
 
+    from langchain_classic.storage import LocalFileStore
+    import tempfile
+    import time
+
+    with tempfile.TemporaryDirectory() as tempdir:
+        store = LocalFileStore(root_path=tempdir)
+
+        cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
+            underlying_embeddings=embedding_model,
+            document_embedding_cache=store,
+            namespace="exercise",
+        )
+        """
+        this code builds a tiny, local, on‑disk embedding cache, and LangChain automatically 
+        checks that cache before calling the embedding model again. That’s why the second call is instant.
+        """
+        text = "What is Reinforcement Learning?"
+
+        # First call - hits API
+        print("First call (API):")
+        start = time.time()
+        vectors1 = cached_embeddings.embed_documents([text])
+        print("First call time:", time.time() - start)
+        print(f"  Embedded {len(vectors1)} documents")
+        
+
+        # Second call - from cache
+        print("\nSecond call (Cache):")
+        start = time.time()
+        vectors2 = cached_embeddings.embed_documents([text])
+        print("Second call time:", time.time() - start)
+        print(f"  Embedded {len(vectors2)} documents")
+
+        # Verify same results
+        print(f"\nSame vectors: {np.allclose(vectors1[0], vectors2[0])}")
 
 if __name__ == "__main__":
     # print("=== Single Text Embedding ===")
     # basic_embeddings()
     # print("=== Batch Embedding ===")
     # batch_embeddings()
-    print("=== Similarity Search ===")
-    similarity_search()
+    # print("=== Similarity Search ===")
+    # similarity_search()
+    print("=== Caching ===")
+    embedding_caching()
